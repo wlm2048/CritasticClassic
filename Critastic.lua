@@ -1,3 +1,5 @@
+local AddonName, AddonTable = ...
+
 local playerGUID = UnitGUID("player")
 local _, _, _, _, sexID, name, _ = GetPlayerInfoByGUID(playerGUID)
 local sex = {
@@ -25,12 +27,9 @@ function Critastic_OnLoad()
 		load_saved_data(...)
 	end
 	frame:SetScript("OnEvent", function(self, event, ...)
-		if event == "ADDON_LOADED" and ... == "Critastic" then
-			print("Hi " .. ...)
+		-- if (event == "ADDON_LOADED" and ... == AddonName) or (event ~= "ADDON_LOADED") then
 			events[event](self, ...)
-		else
-			events[event](self, ...)
-		end
+		-- end
 	end)
 	for k, v in pairs(events) do
 		frame:RegisterEvent(k)
@@ -41,6 +40,7 @@ function Critastic_OnLoad()
 end
 
 function load_saved_data(...)
+	print(AddonName .. " loading...")
 	CritasticStats = copyDefaults(defaults, CritasticStats)
 end
 
@@ -77,7 +77,7 @@ function cleu(event, ...)
 		firstcrit = ""
 		if not CritasticStats["highscores"][action] then
 			CritasticStats["highscores"][action] = 0
-		else
+		elseif CritasticStats["highscores"][action] ~= 0 then -- catch the weird case where 0 got stored
 			firstcrit = MSG_CRITICAL_HIT_BEST:format(playerInfo["sex"], CritasticStats["highscores"][action])
 		end
 
