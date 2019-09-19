@@ -1,12 +1,7 @@
 local AddonName, AddonTable = ...
 
 local playerGUID = UnitGUID("player")
-local _, _, _, _, sexID, name, _ = GetPlayerInfoByGUID(playerGUID)
-local sex = {
-   [2] = "His",
-   [3] = "Her"
-}
-local playerInfo = { ["name"] = name, ["sex"] = sex[sexID] }
+local playerInfo = {}
 local MSG_CRITICAL_HIT = "%s's %s critically hit %s for %d damage!"
 local MSG_CRITICAL_HIT_BEST = " %s previous highest was %d."
 local channelID, channelName = GetChannelName("nvwow")
@@ -19,28 +14,35 @@ local defaults = {
 
 
 function Critastic_OnLoad()
-	local frame, events = CreateFrame("Frame"), {}
-	function events:COMBAT_LOG_EVENT_UNFILTERED(...)
-		cleu(..., CombatLogGetCurrentEventInfo())
-	end
-	function events:ADDON_LOADED(...)
-		load_saved_data(...)
-	end
+	local frame = CreateFrame("Frame")
+	frame:RegisterEvent("ADDON_LOADED")
+	frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	frame:SetScript("OnEvent", function(self, event, ...)
-		-- if (event == "ADDON_LOADED" and ... == AddonName) or (event ~= "ADDON_LOADED") then
-			events[event](self, ...)
-		-- end
-	end)
-	for k, v in pairs(events) do
-		frame:RegisterEvent(k)
-	end
-	-- frame:RegisterEvent("ADDON_LOADED");
-	-- frame:RegisterEvent("PLAYER_LOGOUT");
+		if event == "ADDON_LOADED" then
+			load_saved_data(...)
+			self:UnregisterEvent("ADDON_LOADED")
+		elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+			cleu(..., CombatLogGetCurrentEventInfo())
+    elseif event == "PLAYER_ENTERING_WORLD" then
+      update_player_info(...)
+		else
+      print("Event: " .. event)
+			-- Add other events here
+		end
+  end)
+end
 
+function update_player_info(...)
+  local _, _, _, _, sexID, name, _ = GetPlayerInfoByGUID(playerGUID)
+  local sex = {
+     [2] = "His",
+     [3] = "Her"
+  }
+  playerInfo = { ["name"] = name, ["sex"] = sex[sexID] }
 end
 
 function load_saved_data(...)
-	print(AddonName .. " loading...")
+	print(AddonName .. " loading..." .. ...)
 	CritasticStats = copyDefaults(defaults, CritasticStats)
 end
 
@@ -62,12 +64,15 @@ function cleu(event, ...)
 	if (sourceGUID ~= playerGUID) then
 		return
 	end
+  if not playerInfo["sex"] then
+    update_player_info(...)
+  end
 	local spellId, spellName, spellSchool
 	local amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand
 
 	if subevent == "SWING_DAMAGE" then
 		amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = select(12, ...)
-	elseif subevent == "SPELL_DAMAGE" then
+	elseif subevent == "SPELL_DAMAGE" or subevent == "RANGE_DAMAGE" then
 		spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = select(12, ...)
 	end
 
