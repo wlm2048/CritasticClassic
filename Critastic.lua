@@ -69,20 +69,19 @@ function cleu(event, ...)
   end
 	local spellId, spellName, spellSchool
 	local amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand
-
 	if subevent == "SWING_DAMAGE" then
 		amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = select(12, ...)
 	elseif subevent == "SPELL_DAMAGE" or subevent == "RANGE_DAMAGE" then
 		spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = select(12, ...)
 	end
 
-	if critical and sourceGUID == playerGUID then
+if critical and sourceGUID == playerGUID then
 --			local action = spellId and GetSpellLink(spellId) or "melee swing"
 		local action = spellName or "melee swing"
 		firstcrit = ""
 		if not CritasticStats["highscores"][action] then
 			CritasticStats["highscores"][action] = 0
-		elseif CritasticStats["highscores"][action] ~= 0 then -- catch the weird case where 0 got stored
+		else
 			firstcrit = MSG_CRITICAL_HIT_BEST:format(playerInfo["sex"], CritasticStats["highscores"][action])
 		end
 
