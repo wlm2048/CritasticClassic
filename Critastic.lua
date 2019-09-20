@@ -8,6 +8,7 @@ local channelID, channelName = GetChannelName("nvwow")
 local localdb = {}
 
 local defaults = {
+  debug = false,
 	output = "chatframe",
 	highscores = {}
 }
@@ -80,19 +81,22 @@ function cleu(event, ...)
 	end
 
 if critical and sourceGUID == playerGUID then
---			local action = spellId and GetSpellLink(spellId) or "melee swing"
 		local action = spellName or "melee swing"
 		firstcrit = ""
+    lastcrit = 0
 		if not CritasticStats["highscores"][action] then
 			CritasticStats["highscores"][action] = 0
 		else
 			firstcrit = MSG_CRITICAL_HIT_BEST:format(playerInfo["sex"], CritasticStats["highscores"][action])
+      lastcrit = CritasticStats["highscores"][action]
 		end
 
 		if (amount > CritasticStats["highscores"][action]) then
 			critMessage = MSG_CRITICAL_HIT:format(playerInfo["name"], action, destName, amount) .. firstcrit
 			SendChatMessage(critMessage, "CHANNEL", "COMMON", channelID)
 			CritasticStats["highscores"][action] = amount
+    elseif CritasticStats["debug"] then
+      print("Already got " .. action .. ". last: " .. lastcrit .. " just now: " .. amount)
 		end
 	end
 end
@@ -121,6 +125,16 @@ function Critastic_SlashCrit(msg)
   elseif cmd == "reset" and param == "really" then
     print("Resetting crits for " .. playerInfo["name"])
     CritasticStats["highscores"] = {}
+  elseif cmd == "debug" then
+    if param == "on" then
+      CritasticStats["debug"] = true
+      print("Debug on")
+    elseif param == "off" then
+      CritasticStats["debug"] = false
+      print("Debug off")
+    else
+      print("debug " .. param .. " not understood, use debug [on|off]")
+    end
   end
 end
 
