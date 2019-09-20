@@ -30,6 +30,10 @@ function Critastic_OnLoad()
 			-- Add other events here
 		end
   end)
+
+  SlashCmdList["Critastic"] = Critastic_SlashCrit
+  SLASH_Critastic1 = "/Critastic"
+  SLASH_Critastic2 = "/crit"
 end
 
 function update_player_info(...)
@@ -91,6 +95,33 @@ if critical and sourceGUID == playerGUID then
 			CritasticStats["highscores"][action] = amount
 		end
 	end
+end
+
+function Critastic_SlashCrit(msg)
+	local slashcmd = "/crit"
+  if not playerInfo["name"] then
+    update_player_info()
+  end
+
+	-- InitializeSetup()
+	-- DEFAULT_CHAT_FRAME:AddMessage("Critastic set to " .. CritasticOptions.Status .. " and is now ready.")
+	-- if ( msg ~= "" ) then msg = string.lower(msg) end
+	local f, u, cmd, param = string.find(msg, "^([^ ]+) (.+)$")
+	if ( not cmd ) then
+		cmd = msg
+		param = ""
+	end
+  if cmd == "show" then
+    SendChatMessage("Max crits for " .. playerInfo["name"] .. ":", "CHANNEL", "COMMON", channelID)
+    for action, max in pairs(CritasticStats["highscores"]) do
+      SendChatMessage(action .. ": " .. max, "CHANNEL", "COMMON", channelID)
+    end
+  elseif cmd == "reset" and param ~= "really" then
+    print("Run '" .. slashcmd .. " reset really' to actually reset your scores.")
+  elseif cmd == "reset" and param == "really" then
+    print("Resetting crits for " .. playerInfo["name"])
+    CritasticStats["highscores"] = {}
+  end
 end
 
 Critastic_OnLoad()
