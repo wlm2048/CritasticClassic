@@ -2,7 +2,7 @@ local AddonTable = select(2, ...)
 local AddonName  = select(1, ...)
 
 local tick = 1
-local max_delay = 10
+local max_delay = 20
 
 local playerGUID = UnitGUID("player")
 local playerInfo = {["sex"] = "Their", ["name"] = "Someone"}
@@ -12,7 +12,7 @@ local channelID, channelName = GetChannelName("nvwow")
 local localdb = {}
 
 local defaults = {
-  debug = false,
+  debug = 0,
 	output = "chatframe",
 	highscores = {}
 }
@@ -52,7 +52,7 @@ function Critastic_OnLoad()
 			cleu(..., CombatLogGetCurrentEventInfo())
     elseif event == "PLAYER_ENTERING_WORLD" then
       update_player_info(...)
-      if CritasticStats["debug"] then
+      if CritasticStats["debug"] >= 1 then
         print(AddonName .. " loaded for " .. playerInfo["name"])
       end
 		else
@@ -69,6 +69,14 @@ end
 
 function load_saved_data(...)
 	CritasticStats = copyDefaults(defaults, CritasticStats)
+  -- update old true|false to current level based debug
+  if (type(CritasticStats["debug"]) == "boolean") then
+    if CritasticStats["debug"] then
+      CritasticStats["debug"] = 1
+    else
+      CritasticStats["debug"] = 0
+    end
+  end
 end
 
 function copyDefaults(src, dst)
@@ -89,6 +97,9 @@ function cleu(event, ...)
 	if (sourceGUID ~= playerGUID) then
 		return
 	end
+  if CritasticStats["debug"] >= 3 then
+    print(...)
+  end
 	local spellId, spellName, spellSchool
 	local amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand
 	if subevent == "SWING_DAMAGE" then
@@ -114,34 +125,10 @@ if critical and sourceGUID == playerGUID then
 			critMessage = MSG_CRITICAL_HIT:format(playerInfo["name"], action, destName, amount) .. firstcrit
 			SendChatMessage(critMessage, "CHANNEL", "COMMON", channelID)
 			CritasticStats["highscores"][action] = amount
-    elseif CritasticStats["debug"] then
+    elseif CritasticStats["debug"] >= 2 then
       print("Already got " .. action .. ". last: " .. lastcrit .. " just now: " .. amount)
 		end
 	end
-end
-
-
-function showgui()
-  local guiFrame = CreateFrame("Frame")
-
-  guiFrame:SetMovable(true)
-  guiFrame:EnableMouse(true)
-  guiFrame:RegisterForDrag("LeftButton")
-  guiFrame:SetScript("OnDragStart", guiFrame.StartMoving)
-  guiFrame:SetScript("OnDragStop", guiFrame.StopMovingOrSizing)
-
-  guiFrame:SetPoint("CENTER"); guiFrame:SetWidth(64); guiFrame:SetHeight(40);
-  local tex = guiFrame:CreateTexture("ARTWORK");
-  tex:SetAllPoints();
-  tex:SetTexture(1.0, 0.5, 0); tex:SetAlpha(0.5);
-
-  local btnReport = CreateFrame("Button","myButton",UIParent,"UIPanelButtonTemplate")
-
-  btnReport:SetPoint("CENTER", guiFrame, "CENTER", 0,0)
-
-  btnReport:SetWidth(70)
-  btnReport:SetHeight(22)
-  btnReport:SetText("Report")
 end
 
 function Critastic_SlashCrit(msg)
@@ -151,9 +138,7 @@ function Critastic_SlashCrit(msg)
 		cmd = msg
 		param = ""
 	end
-  if cmd == "" then
-    showgui()
-  elseif cmd == "show" then
+  if cmd == "show" then
     SendChatMessage("Max crits for " .. playerInfo["name"] .. ":", "CHANNEL", "COMMON", channelID)
     for action, max in pairs(CritasticStats["highscores"]) do
       SendChatMessage(action .. ": " .. max, "CHANNEL", "COMMON", channelID)
@@ -164,14 +149,16 @@ function Critastic_SlashCrit(msg)
     print("Resetting crits for " .. playerInfo["name"])
     CritasticStats["highscores"] = {}
   elseif cmd == "debug" then
-    if param == "on" then
-      CritasticStats["debug"] = true
-      print("Debug on")
-    elseif param == "off" then
+    if param == "1" or param == "2" or param == "3" then
+      CritasticStats["debug"] = tonumber(param)
+      print("Debug on: " .. param)
+    elseif param == "0" then
       CritasticStats["debug"] = false
       print("Debug off")
+    elseif param == "" then
+      print("Debug set to: " .. CritasticStats["debug"])
     else
-      print("debug " .. param .. " not understood, use debug [on|off]")
+      print("debug " .. param .. " not understood, use debug [ 0 | 1 | 2 | 3 ]")
     end
   else
     print("end of cmd check: " .. cmd)
