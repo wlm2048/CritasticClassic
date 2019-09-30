@@ -1,11 +1,11 @@
 local AddonTable = select(2, ...)
 local AddonName  = select(1, ...)
 
-local tick = 1
+local tick = 2
 local max_delay = 20
 
-local playerGUID = UnitGUID("player")
-local playerInfo = {["sex"] = "Their", ["name"] = "Someone"}
+local playerGUID
+local playerInfo = {}
 local MSG_CRITICAL_HIT = "%s's %s critically hit %s for %d damage!"
 local MSG_CRITICAL_HIT_BEST = " %s previous highest was %d."
 local channelID, channelName = GetChannelName("nvwow")
@@ -21,6 +21,7 @@ local defaults = {
 }
 
 function getPIBG()
+  playerGUID = UnitGUID("player")
   local _, _, _, _, sexID, name, _ = GetPlayerInfoByGUID(playerGUID)
   if name ~= nil then
     local sex = {
@@ -35,28 +36,31 @@ function getPIBG()
 end
 
 function update_player_info(...)
-  for i=1,max_delay do
-    local ret = getPIBG()
-    if ret then return end
+  local ret
+  for i=1, max_delay do
+    ret = getPIBG()
   end
+  if ret then return end
   C_Timer.After(tick, update_player_info)
 end
 
 function Critastic_OnLoad()
 	local frame = CreateFrame("Frame")
   frame:RegisterEvent("ADDON_LOADED")
-  frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+  frame:RegisterEvent("PLAYER_LOGIN")
 	frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	frame:SetScript("OnEvent", function(self, event, ...)
 		if event == "ADDON_LOADED" and ... == AddonName then
 			load_saved_data(...)
+      update_player_info(...)
 			self:UnregisterEvent("ADDON_LOADED")
 		elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+      update_player_info(...)
 			cleu(..., CombatLogGetCurrentEventInfo())
-    elseif event == "PLAYER_ENTERING_WORLD" then
+    elseif event == "PLAYER_LOGIN" then
       update_player_info(...)
       if CritasticStats["debug"] >= 1 then
-        print(AddonName .. " loaded for " .. playerInfo["name"])
+        print(AddonName .. " loaded")
       end
 		else
       print("Event: " .. event)
