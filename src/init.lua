@@ -1,9 +1,6 @@
 local CritasticAddOn = select(2, ...)
 local AddonName      = select(1, ...)
 
--- local Debug      = CritasticAddOn.Debug
--- local Settings   = CritasticAddOn.Settings
--- local HighScores = CritasticAddOn.HighScores
 local Character = CritasticAddOn.Character
 local Chat      = CritasticAddOn.Chat
 local Crits     = CritasticAddOn.Crits
@@ -12,9 +9,6 @@ local main = CreateFrame("Frame")
 CritasticAddOn.main = main
 
 function CritasticAddOn:Init()
-  -- local Debug:Init()
-  -- local Settings:Init()
-  -- local HighScores:Init()
   Chat:Init()
   Crits:Init()
 end

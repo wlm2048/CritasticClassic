@@ -12,7 +12,9 @@ local addonName = select(1, ...)
 CritasticAddOn.Chat = {}
 
 ---@class Chat
-local Chat = CritasticAddOn.Chat
+local Chat  = CritasticAddOn.Chat
+local Debug = CritasticAddOn.Debug
+local Crits = CritasticAddOn.Crits
 
 --------------------------------------
 -- Defaults
@@ -28,7 +30,14 @@ Chat.commands = {
         print(" ")
     end,
     ["show"] = function(all)
-      -- TODO: noop right now
+      Crits:Show(all)
+    end,
+    ["debug"] = function(level)
+      if (match(level, "[0-3]")) then
+        Debug:SetDebugLevel(level)
+      else
+        Chat:Print("Unknown debug level: " .. level)
+      end
     end,
     ["channel"] = function(...)
       if (... == "nvwow" or ... == "print") then

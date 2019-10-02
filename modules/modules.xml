@@ -4,4 +4,6 @@
   <Script file="character.lua"/>
   <Script file="chat.lua"/>
   <Script file="crits.lua"/>
+  <Script file="debug.lua"/>
+  <Script file="utils.lua"/>
 </Ui>

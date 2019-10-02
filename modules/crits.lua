@@ -15,6 +15,8 @@ CritasticAddOn.Crits = {}
 local Crits     = CritasticAddOn.Crits
 local Character = CritasticAddOn.Character
 local Chat      = CritasticAddOn.Chat
+local Debug     = CritasticAddOn.Debug
+local Utils     = CritasticAddOn.Utils
 
 Crits.MSG_CRITICAL_HIT = "%s's %s critically hit %s for %d damage!"
 Crits.MSG_CRITICAL_HIT_BEST = " %s previous highest was %d."
@@ -31,11 +33,31 @@ function Crits:Init()
     }
   end
   Chat:SetOutput(CritasticStats["output"])
+  Debug:SetDebugLevel(CritasticStats["debug"])
+end
+
+function Crits:Show(all)
+  local show_top = 3
+  if (all == "all") then show_top = nil end
+  Chat:Report(format("Max crits for %s:", CritasticStats.playerInfo["name"]))
+  local types = {"harming", "healing"}
+  for _, type in ipairs(types) do
+    if (Utils:TableLength(CritasticStats["highscores"][type]) > 0) then
+      showOutput(format(" %s:", Utils:FirstToUpper(type)))
+      local sorted_keys = Utils:GetKeysSortedByValue(CritasticStats["highscores"][type], function(a, b) return a > b end, show_top)
+      for _, key in ipairs(sorted_keys) do
+        Chat:Report(format("  %s: %d", key, CritasticStats["highscores"][type][key]))
+      end
+    end
+  end
 end
 
 function Crits:Event(event, ...)
   local subevent, _, sourceGUID = select(2, ...)
   if (sourceGUID ~= Character.guid) then return end
+  if (Debug.level >= Debug.TRACE) then
+    Chat:Print(...)
+  end
 
   local type = "harming"
   local spellName, amount, critical
@@ -64,8 +86,8 @@ function Crits:Event(event, ...)
       Chat:Report(critMessage)
       CritasticStats["highscores"][type][action] = amount
     -- elseif CritasticStats["debug"] >= 2 then
-    elseif true then
-      Chat:Report(format("%s Already has %s. Best: %d, Now: %d", Character.playerInfo["name"], action, lastcrit, amount))
+    elseif Debug.level >= Debug.DEBUG then
+      Chat:Print(format("%s Already has %s. Best: %d, Now: %d", Character.playerInfo["name"], action, lastcrit, amount))
     end
   end
 end
