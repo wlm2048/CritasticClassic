@@ -39,11 +39,11 @@ end
 function Crits:Show(all)
   local show_top = 3
   if (all == "all") then show_top = nil end
-  Chat:Report(format("Max crits for %s:", CritasticStats.playerInfo["name"]))
+  Chat:Report(format("Max crits for %s:", Character.playerInfo["name"]))
   local types = {"harming", "healing"}
   for _, type in ipairs(types) do
     if (Utils:TableLength(CritasticStats["highscores"][type]) > 0) then
-      showOutput(format(" %s:", Utils:FirstToUpper(type)))
+      Chat:Report(format(" %s:", Utils:FirstToUpper(type)))
       local sorted_keys = Utils:GetKeysSortedByValue(CritasticStats["highscores"][type], function(a, b) return a > b end, show_top)
       for _, key in ipairs(sorted_keys) do
         Chat:Report(format("  %s: %d", key, CritasticStats["highscores"][type][key]))
@@ -53,9 +53,9 @@ function Crits:Show(all)
 end
 
 function Crits:Event(event, ...)
-  local subevent, _, sourceGUID = select(2, ...)
+  local subevent, _, sourceGUID, _, _, _, _, destName = select(2, ...)
   if (sourceGUID ~= Character.guid) then return end
-  if (Debug.level >= Debug.TRACE) then
+  if (Debug.Is("TRACE")) then
     Chat:Print(...)
   end
 
@@ -86,7 +86,7 @@ function Crits:Event(event, ...)
       Chat:Report(critMessage)
       CritasticStats["highscores"][type][action] = amount
     -- elseif CritasticStats["debug"] >= 2 then
-    elseif Debug.level >= Debug.DEBUG then
+    elseif Debug.Is("DEBUG") then
       Chat:Print(format("%s Already has %s. Best: %d, Now: %d", Character.playerInfo["name"], action, lastcrit, amount))
     end
   end

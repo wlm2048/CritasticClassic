@@ -30,21 +30,30 @@ Chat.commands = {
         print(" ")
     end,
     ["show"] = function(all)
+      if (Crits == nil) then Crits = CritasticAddOn.Crits end
       Crits:Show(all)
+    end,
+    ["reset"] = function()
+      if (Crits == nil) then Crits = CritasticAddOn.Crits end
+      CritasticStats = nil
+      Crits:Init()
     end,
     ["debug"] = function(level)
       if (match(level, "[0-3]")) then
         Debug:SetDebugLevel(level)
+        Chat:Print("Debug level set to: " .. level)
       else
         Chat:Print("Unknown debug level: " .. level)
+        Chat.commands.help()
       end
     end,
-    ["channel"] = function(...)
-      if (... == "nvwow" or ... == "print") then
-        CritasticStats["output"] = ...
-        Chat:SetOutput(...)
+    ["channel"] = function(channel)
+      if (channel == "nvwow" or channel == "print") then
+        CritasticStats["output"] = channel
+        Chat:SetOutput(channel)
+        Chat:Print("Output set to: " .. channel)
       else
-        Chat:Print("Incorrect output channel: " .. ...)
+        Chat:Print("Incorrect output channel: " .. channel)
         Chat.commands.help()
       end
     end
@@ -67,7 +76,8 @@ end
 function Chat:SetOutput(output)
   if (output == "nvwow") then
     self.output = function(msg)
-      SendChatMessage(format("%s", msg), "CHANNEL", "COMMON", self.channelID)
+      if (not Chat.channelID) then Chat.channelID = GetChannelName("nvwow") end
+      SendChatMessage(format("%s", msg), "CHANNEL", "COMMON", Chat.channelID)
     end
   else
     self.output = function(msg)
@@ -80,13 +90,19 @@ function Chat:Report(msg)
   Chat.output(msg)
 end
 
+function Chat:JoinedChannel(...)
+  local type, _, _, numname, _, _, type, number, name = ...
+  if (name ~= "nvwow") then return end
+  Chat.channelID = GetChannelName("nvwow")
+  Chat:Print("Joined channel " .. name)
+end
+
 --------------------------------------
 -- Lifecycle Events
 --------------------------------------
 ---
 ---Initializes the chat slash commands
 function Chat:Init()
-  self.channelID = GetChannelName("nvwow")
     SLASH_Critastic1 = self.command
     SlashCmdList["Critastic"] = function(msg)
         local str = msg

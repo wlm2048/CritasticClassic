@@ -11,6 +11,8 @@ local addonName = select(1, ...)
 --------------------------------------
 CritasticAddOn.Utils = {}
 
+local Utils = CritasticAddOn.Utils
+
 function Utils:TableLength(t)
   local count = 0
   for _ in pairs(t) do count = count + 1 end
@@ -41,7 +43,7 @@ function Utils:GetKeysSortedByValue(...)
   end)
 
   if (max) then
-    keys = self.TableSlice(keys, 1, max, 1)
+    keys = Utils:TableSlice(keys, 1, max, 1)
   end
 
   return keys

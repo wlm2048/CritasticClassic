@@ -11,16 +11,20 @@ local addonName = select(1, ...)
 --------------------------------------
 CritasticAddOn.Debug = {}
 
-Debug.OFF   = 0
-Debug.INFO  = 1
-Debug.DEBUG = 2
-Debug.TRACE = 3
+local Debug = CritasticAddOn.Debug
+
+Debug.Levels = {
+  NONE = 0,
+  INFO = 1,
+  DEBUG = 2,
+  TRACE = 3
+}
 
 function Debug:SetDebugLevel(level)
-  self.level = level
+  Debug.level = level
   CritasticStats["debug"] = tostring(level)
 end
 
-Debug.level = function()
-  return tonumber(self.level)
+Debug.Is = function(level)
+  return tonumber(Debug.level) >= tonumber(Debug.Levels[level])
 end

@@ -16,6 +16,7 @@ end
 main:RegisterEvent("ADDON_LOADED")
 main:RegisterEvent("PLAYER_ENTERING_WORLD")
 main:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+main:RegisterEvent("CHAT_MSG_CHANNEL_NOTICE")
 main:SetScript("OnEvent", function(self, event, ...)
   if (event == "ADDON_LOADED" and ... == AddonName) then
     CritasticAddOn.Init()
@@ -23,6 +24,8 @@ main:SetScript("OnEvent", function(self, event, ...)
     Character:Init()
     Chat:Print("login " .. Character.playerInfo["name"])
     self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+  elseif (event == "CHAT_MSG_CHANNEL_NOTICE") then
+    Chat:JoinedChannel(...)
   elseif (event == "COMBAT_LOG_EVENT_UNFILTERED") then
     Crits:Event(..., CombatLogGetCurrentEventInfo())
   end
