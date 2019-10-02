@@ -3,4 +3,5 @@
 ## Notes: Emote when you get really high crits
 ## Author: wlm2048 (based on previous work by Gearshaft)
 ## SavedVariablesPerCharacter: CritasticStats
-Critastic.lua
+src\init.xml
+src\init.lua

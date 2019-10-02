@@ -1,9 +1,6 @@
 local AddonTable = select(2, ...)
 local AddonName  = select(1, ...)
 
-local tick = 2
-local max_delay = 20
-
 local playerGUID
 local playerInfo = {}
 local MSG_CRITICAL_HIT = "%s's %s critically hit %s for %d damage!"
@@ -20,7 +17,7 @@ local defaults = {
   }
 }
 
-function getPIBG()
+function update_player_info()
   playerGUID = UnitGUID("player")
   local _, _, _, _, sexID, name, _ = GetPlayerInfoByGUID(playerGUID)
   if name ~= nil then
@@ -33,15 +30,6 @@ function getPIBG()
   else
     return false
   end
-end
-
-function update_player_info(...)
-  local ret
-  for i=1, max_delay do
-    ret = getPIBG()
-  end
-  if ret then return end
-  C_Timer.After(tick, update_player_info)
 end
 
 function Critastic_OnLoad()
@@ -226,6 +214,7 @@ function firstToUpper(str)
 end
 
 function Critastic_SlashCrit(msg)
+  print(update_player_info())
 	local slashcmd = "/crit"
 	local f, u, cmd, param = string.find(msg, "^([^ ]+) (.+)$")
 	if ( not cmd ) then
