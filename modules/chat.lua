@@ -39,7 +39,8 @@ Chat.commands = {
       Crits:Init()
     end,
     ["debug"] = function(level)
-      if (match(level, "[0-3]")) then
+      if (Debug == nil) then Debug = CritasticAddOn.Debug end
+      if (string.match(level, "[0-3]")) then
         Debug:SetDebugLevel(level)
         Chat:Print("Debug level set to: " .. level)
       else
