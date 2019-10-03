@@ -20,7 +20,7 @@ function Utils:TableLength(t)
 end
 
 function Utils:FirstToUpper(str)
-    return (str:gsub("^%l", string.upper))
+  return (str:gsub("^%l", string.upper))
 end
 
 function Utils:TableSlice(tbl, first, last, step)

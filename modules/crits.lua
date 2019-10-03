@@ -85,7 +85,7 @@ function Crits:Event(event, ...)
       critMessage = self.MSG_CRITICAL_HIT:format(Character.playerInfo["name"], action, destName, amount) .. firstcrit
       Chat:Report(critMessage)
       CritasticStats["highscores"][type][action] = amount
-    -- elseif CritasticStats["debug"] >= 2 then
+      -- elseif CritasticStats["debug"] >= 2 then
     elseif Debug.Is("DEBUG") then
       Chat:Print(format("%s Already has %s. Best: %d, Now: %d", Character.playerInfo["name"], action, lastcrit, amount))
     end
